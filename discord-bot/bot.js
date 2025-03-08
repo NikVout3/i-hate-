@@ -2,9 +2,15 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const axios = require('axios');
 require('dotenv').config();
 const { getProductIdForTitle, getProductIdForChannel } = require('./voodoo');
+const { handleAuthCommand } = require('./auth-command'); // Import the new authentication module
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+  intents: [
+    GatewayIntentBits.Guilds, 
+    GatewayIntentBits.GuildMessages, 
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.DirectMessages // Add direct messages intent
+  ]
 });
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
@@ -74,6 +80,30 @@ async function updateProductStatus(newTag, productTitle, productId) {
 }
 
 /**
+ * Message Event Handler - Processes incoming messages and handles authentication
+ */
+client.on('messageCreate', async (message) => {
+  // Ignore messages from bots to prevent potential loops
+  if (message.author.bot) return;
+  
+  // Only process authentication in direct messages (DMs)
+  if (message.guild === null) {
+    // This is a DM with the bot
+    await handleAuthCommand(message, client);
+    return;
+  }
+  
+  // In servers, only respond to the !auth command by telling the user to DM the bot
+  if (message.content.toLowerCase() === '!auth') {
+    await message.reply('Please send me a direct message to begin the authentication process.');
+    return;
+  }
+  
+  // Your existing message handling logic here
+  // ...
+});
+
+/**
  * Periodic channel scan for status updates based solely on channel names.
  */
 client.on('ready', () => {
@@ -138,7 +168,7 @@ client.on('ready', () => {
     // Wait until all guilds have been processed
     await Promise.all(guildPromises);
     console.log('[INFO] Cycle complete. Waiting 30 minutes for the next cycle...');
-  }, 1800000); // every 1 hour (3600000 milliseconds)
+  }, 1800000); // every 30 minutes (1800000 milliseconds)
 });
 
 client.on('error', error => console.error('[ERROR] Discord client error:', error));

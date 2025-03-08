@@ -1902,3 +1902,5 @@
 2025-03-01T00:22:49.220Z [INFO]: Received request to update product 14848066912641 tag to: working
 2025-03-01T00:22:49.226Z [INFO]: Updating product 14848066912641 tag to: working
 2025-03-01T00:22:49.678Z [INFO]: Updated product 14848066912641 with tag "working": HTTP 200
+2025-03-08T22:39:06.307Z [INFO]: API server running on port 3001
+2025-03-08T22:39:06.310Z [INFO]: API server running on port 3001
